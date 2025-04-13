@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Me, Love Me Not</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #e4eaf0);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .flower-container {
+            position: relative;
+            margin-bottom: 20vmin;
+        }
+
+        .flower {
+            position: relative;
+            width: 50vmin;
+            height: 50vmin;
+            transform-origin: center bottom;
+        }
+
+        .center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 25%;
+            height: 25%;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+
+        .stem {
+            position: absolute;
+            bottom: -40vmin;
+            left: 50%;
+            width: 2vmin;
+            height: 60vmin;
+            background: linear-gradient(to bottom, #6ab04c, #4a9035);
+            transform: translateX(-50%);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .petal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            border-radius: 50% 50% 50% 50% / 80% 80% 20% 20%;
+            transform-origin: center bottom;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease, filter 0.3s ease;
+            z-index: 50;
+        }
+
+        .petal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.5), transparent);
+            border-radius: inherit;
+        }
+
+        .petal:hover {
+            filter: brightness(1.1);
+            transform: translateY(-5px) rotate(5deg) scale(1.05);
+        }
+
+        .message-container {
+            position: absolute;
+            bottom: -15vmin;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 200;
+        }
+
+        .message {
+            font-size: 5vmin;
+            color: #333;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 2vmin 4vmin;
+            border-radius: 5vmin;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            min-width: 250px;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(20px);
+        }
+
+        .message.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .status {
+            font-size: 3vmin;
+            color: #555;
+            margin-top: 2vmin;
+            font-style: italic;
+        }
+
+        .leaf {
+            position: absolute;
+            width: 12vmin;
+            height: 6vmin;
+            background-color: #4a9035;
+            border-radius: 50% 50% 50% 50% / 80% 80% 20% 20%;
+            transform: rotate(45deg);
+            z-index: 5;
+        }
+
+        .leaf:nth-child(1) {
+            bottom: 4vmin;
+            left: 6vmin;
+            transform: rotate(130deg);
+        }
+
+        .leaf:nth-child(2) {
+            bottom: 10vmin;
+            right: 6vmin;
+            transform: rotate(-130deg);
+        }
+
+        .controls {
+            margin-top: 4vmin;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3vmin;
+        }
+
+        .restart {
+            padding: 2vmin 4vmin;
+            font-size: 3vmin;
+            background-color: #ff758c;
+            color: white;
+            border: none;
+            border-radius: 5vmin;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .restart.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .restart:hover {
+            background-color: #ff5576;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .flower-selector {
+            display: flex;
+            gap: 3vmin;
+            margin-bottom: 4vmin;
+        }
+
+        .flower-option {
+            width: 12vmin;
+            height: 12vmin;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 0.5vmin solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flower-option.active {
+            border-color: #333;
+            transform: scale(1.1);
+        }
+
+        .flower-option:hover {
+            transform: scale(1.1);
+        }
+
+        .flower-option::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4vmin;
+            height: 4vmin;
+            border-radius: 50%;
+        }
+
+        .flower-option.pink {
+            background-color: #ffb7c5;
+        }
+
+        .flower-option.pink::after {
+            background-color: #ff4d6d;
+        }
+
+        .flower-option.blue {
+            background-color: #a7c5eb;
+        }
+
+        .flower-option.blue::after {
+            background-color: #4a86e8;
+        }
+
+        .flower-option.yellow {
+            background-color: #ffe66d;
+        }
+
+        .flower-option.yellow::after {
+            background-color: #ff9800;
+        }
+
+        .flower-option.purple {
+            background-color: #d0a2f7;
+        }
+
+        .flower-option.purple::after {
+            background-color: #9d4edd;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-15px) rotate(3deg);
+            }
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+        }
+
+        @keyframes fallingPetal {
+            0% {
+                transform: translateY(0) rotate(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(1000px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 1.5vmin;
+            height: 1.5vmin;
+            border-radius: 50%;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        .volume-control {
+            position: absolute;
+            top: 2vmin;
+            right: 2vmin;
+            display: flex;
+            align-items: center;
+            gap: 2vmin;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 1.5vmin 3vmin;
+            border-radius: 4vmin;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .volume-control svg {
+            cursor: pointer;
+            width: 4vmin;
+            height: 4vmin;
+        }
+
+        .volume-slider {
+            width: 15vmin;
+            height: 1vmin;
+        }
+
+        @media (max-width: 600px) {
+            .flower-option {
+                width: 8vmin;
+                height: 8vmin;
+            }
+
+            .volume-control {
+                top: 2vmin;
+                right: 2vmin;
+                padding: 1vmin 2vmin;
+            }
+
+            .volume-slider {
+                width: 15vmin;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="volume-control">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="volume-icon">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+            <input type="range" min="0" max="1" step="0.1" value="0.7" class="volume-slider">
+        </div>
+
+        <div class="flower-selector">
+            <div class="flower-option pink active" data-color="pink"></div>
+            <div class="flower-option blue" data-color="blue"></div>
+            <div class="flower-option yellow" data-color="yellow"></div>
+            <div class="flower-option purple" data-color="purple"></div>
+        </div>
+
+        <div class="flower-container">
+            <div class="particles"></div>
+            <div class="flower">
+                <div class="stem"></div>
+                <div class="leaf"></div>
+                <div class="leaf"></div>
+                <div class="center"></div>
+                <!-- Petals will be added by JavaScript -->
+            </div>
+
+            <div class="message-container">
+                <div class="message">Love Me, Love Me Not...</div>
+                <div class="status">Click on petals to pluck them</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="restart">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const flower = document.querySelector('.flower');
+            const message = document.querySelector('.message');
+            const restartButton = document.querySelector('.restart');
+            const status = document.querySelector('.status');
+            const particles = document.querySelector('.particles');
+            const flowerOptions = document.querySelectorAll('.flower-option');
+            const volumeSlider = document.querySelector('.volume-slider');
+            const volumeIcon = document.querySelector('#volume-icon');
+
+            // Audio elements
+            const pluckSounds = [
+                'https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/snap.mp3'
+                
+            ];
+
+            const loveMeSounds = [
+                'https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/button_tiny.mp3'
+            ];
+
+            const lovesMeNotSounds = [
+                'https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/button_tiny.mp3'
+            ];
+
+            const completionSounds = [
+                'https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/water_droplet.mp3'
+            ];
+
+            let globalVolume = 0.8;
+
+            // Flower color schemes
+            const flowerSchemes = {
+                pink: {
+                    petals: ['#ffb7c5', '#ff8fab', '#ff5d8f', '#ff4d6d'],
+                    center: 'radial-gradient(circle, #ffdc5e 0%, #f9a825 100%)'
+                },
+                blue: {
+                    petals: ['#a7c5eb', '#8daed6', '#6f9bd1', '#5588cb'],
+                    center: 'radial-gradient(circle, #ffffff 0%, #d0e1f9 100%)'
+                },
+                yellow: {
+                    petals: ['#ffe66d', '#ffd54f', '#ffca28', '#ffc107'],
+                    center: 'radial-gradient(circle, #ff9800 0%, #ff6d00 100%)'
+                },
+                purple: {
+                    petals: ['#d0a2f7', '#b088f9', '#9772fb', '#8c52ff'],
+                    center: 'radial-gradient(circle, #ffdc5e 0%, #f9a825 100%)'
+                }
+            };
+
+            let currentFlower = 'pink';
+            let PETAL_COUNT;
+            let currentIndex = 0;
+            let loveMe = true;
+            let gameFinished = false;
+
+            // Update volume controller
+            volumeSlider.addEventListener('input', function() {
+                globalVolume = parseFloat(this.value);
+
+                if (globalVolume === 0) {
+                    volumeIcon.innerHTML = `
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <line x1="23" y1="9" x2="17" y2="15"></line>
+                        <line x1="17" y1="9" x2="23" y2="15"></line>
+                    `;
+                } else if (globalVolume < 0.5) {
+                    volumeIcon.innerHTML = `
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    `;
+                } else {
+                    volumeIcon.innerHTML = `
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                    `;
+                }
+            });
+
+            volumeIcon.addEventListener('click', function() {
+                if (globalVolume > 0) {
+                    volumeIcon.dataset.prevVolume = globalVolume;
+                    globalVolume = 0;
+                    volumeSlider.value = 0;
+
+                    volumeIcon.innerHTML = `
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <line x1="23" y1="9" x2="17" y2="15"></line>
+                        <line x1="17" y1="9" x2="23" y2="15"></line>
+                    `;
+                } else {
+                    globalVolume = parseFloat(volumeIcon.dataset.prevVolume || 0.7);
+                    volumeSlider.value = globalVolume;
+
+                    if (globalVolume < 0.5) {
+                        volumeIcon.innerHTML = `
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        `;
+                    } else {
+                        volumeIcon.innerHTML = `
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                        `;
+                    }
+                }
+            });
+
+            // Helper function to play a random sound from an array
+            function playRandomSound(sounds) {
+                if (globalVolume === 0) return;
+
+                const randomIndex = Math.floor(Math.random() * sounds.length);
+                const sound = new Audio(sounds[randomIndex]);
+                sound.volume = globalVolume;
+                sound.play();
+            }
+
+            // Flower option selection
+            flowerOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (gameFinished) return;
+
+                    flowerOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFlower = this.dataset.color;
+                    restart();
+                });
+            });
+
+            // Generate petals in a circular pattern
+            function createPetals() {
+                const scheme = flowerSchemes[currentFlower];
+                document.querySelector('.center').style.background = scheme.center;
+
+                // Get flower size for responsive scaling
+                const flowerSize = flower.offsetWidth;
+
+                // Set center size
+                const center = document.querySelector('.center');
+                const centerSize = flowerSize * 0.25;
+                center.style.width = `${centerSize}px`;
+                center.style.height = `${centerSize}px`;
+
+                // Randomize petal count between 10 and 20
+                PETAL_COUNT = Math.floor(Math.random() * 11) + 10;
+
+                // Calculate distance for petal placement
+                const distance = flowerSize * 0.35;
+
+                for (let i = 0; i < PETAL_COUNT; i++) {
+                    const petal = document.createElement('div');
+                    petal.classList.add('petal');
+
+                    const angle = (i / PETAL_COUNT) * 360;
+                    const colorIndex = Math.floor(Math.random() * scheme.petals.length);
+                    petal.style.backgroundColor = scheme.petals[colorIndex];
+                    petal.style.transform = `rotate(${angle}deg) translateY(-${distance}px)`;
+
+                    // Responsive petal sizes
+                    const basePetalWidth = flowerSize * 0.3;
+                    const basePetalHeight = flowerSize * 0.45;
+                    const scale = 0.8 + Math.random() * 0.4;
+                    petal.style.width = `${basePetalWidth * scale}px`;
+                    petal.style.height = `${basePetalHeight * scale}px`;
+
+                    petal.dataset.index = i;
+                    petal.addEventListener('click', handlePetalClick);
+                    flower.appendChild(petal);
+                }
+
+                message.textContent = "Love Me, Love Me Not...";
+                message.classList.add('visible');
+            }
+
+            function handlePetalClick(e) {
+                if (gameFinished) return;
+
+                const petal = e.target;
+
+                playRandomSound(pluckSounds);
+
+                if (loveMe) {
+                    message.textContent = "Loves me...";
+                    message.style.color = "#e91e63";
+                    setTimeout(() => playRandomSound(loveMeSounds), 200);
+                } else {
+                    message.textContent = "Loves me not...";
+                    message.style.color = "#333";
+                    setTimeout(() => playRandomSound(lovesMeNotSounds), 200);
+                }
+
+                loveMe = !loveMe;
+
+                petal.style.animation = 'fallingPetal 1.5s forwards ease-in-out';
+                createParticleEffect(petal);
+                petal.removeEventListener('click', handlePetalClick);
+
+                currentIndex++;
+
+                if (currentIndex >= PETAL_COUNT) {
+                    setTimeout(() => {
+                        gameFinished = true;
+
+                        setTimeout(() => {
+                            playRandomSound(completionSounds);
+
+                            if (!loveMe) {
+                                message.textContent = "Loves me! ❤️";
+                                message.style.color = "#e91e63";
+                            } else {
+                                message.textContent = "Loves me not... 💔";
+                                message.style.color = "#333";
+                            }
+
+                            restartButton.classList.add('visible');
+                            status.textContent = "Game complete";
+                        }, 500);
+                    }, 1000);
+                }
+            }
+
+            function createParticleEffect(petal) {
+                const rect = petal.getBoundingClientRect();
+                const containerRect = flower.getBoundingClientRect();
+
+                for (let i = 0; i < 12; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+
+                    const x = rect.left - containerRect.left + rect.width / 2;
+                    const y = rect.top - containerRect.top + rect.height / 2;
+
+                    particle.style.left = `${x}px`;
+                    particle.style.top = `${y}px`;
+                    particle.style.backgroundColor = window.getComputedStyle(petal).backgroundColor;
+
+                    const size = 3 + Math.random() * 8;
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+
+                    const duration = 0.5 + Math.random() * 1;
+                    const xMove = (Math.random() - 0.5) * 100;
+                    const yMove = 50 + Math.random() * 100;
+
+                    particle.style.animation = `particle ${duration}s ease-out forwards`;
+
+                    const keyframes = `
+                        @keyframes particle {
+                            0% { transform: translate(0, 0); opacity: 1; }
+                            100% { transform: translate(${xMove}px, ${yMove}px); opacity: 0; }
+                        }
+                    `;
+
+                    const styleElement = document.createElement('style');
+                    styleElement.textContent = keyframes;
+                    document.head.appendChild(styleElement);
+                    particles.appendChild(particle);
+
+                    setTimeout(() => {
+                        particle.remove();
+                        styleElement.remove();
+                    }, duration * 1000);
+                }
+            }
+
+            function restart() {
+                document.querySelectorAll('.petal').forEach(petal => petal.remove());
+
+                currentIndex = 0;
+                loveMe = true;
+                gameFinished = false;
+
+                restartButton.classList.remove('visible');
+                message.textContent = "Love Me, Love Me Not...";
+                message.style.color = "#333";
+                status.textContent = "Click on petals to pluck them";
+
+                createPetals();
+            }
+
+            flower.style.animation = 'float 5s infinite ease-in-out';
+            restartButton.addEventListener('click', restart);
+            createPetals();
+        });
+    </script>
+</body>
+</html>
